@@ -28,9 +28,8 @@ void setup() {
 void loop() {
   byte sensorValue = readMoisture();
   logSensorValue(sensorValue);
-  if(sensorValue > 167){
-    runPump();
-  }
+  //if(sensorValue > 167)
+  //  runPump();
   sleepForAWhile();
 }
 
@@ -54,7 +53,8 @@ void runPump(){
 
 void sleepForAWhile(){
   SoftSerial.println("Starting sleep");
-  delay(15*SECONDS);
+  delay(60*MINUTES);
+  //snore(60*MINUTES); // Use when on battery
   SoftSerial.println("Sleep done");
 }
 
@@ -63,11 +63,11 @@ void logSensorValue(byte sensorValue){
   SoftSerial.print(currentLogIndex);
   SoftSerial.print(": ");
   SoftSerial.println(sensorValue);
-  if (currentLogIndex < 510){ //Stop writing when hitting last EEPROM slot
-    EEPROM.write(currentLogIndex, sensorValue); //Don't overwrite currentLogIndex in EEPROM
-    currentLogIndex++;
-    writeIntIntoEEPROM(0, currentLogIndex);
-  }
+  if (currentLogIndex == 512) //Rotate back to First index (2 since we store current index at 0 and 1)
+    currentLogIndex = 2;
+  EEPROM.write(currentLogIndex, sensorValue); //Don't overwrite currentLogIndex in EEPROM
+  currentLogIndex++;
+  writeIntIntoEEPROM(0, currentLogIndex);
 }
 
 void writeIntIntoEEPROM(int address, int number)
